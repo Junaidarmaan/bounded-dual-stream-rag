@@ -1,0 +1,35 @@
+
+services:
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:latest
+    container_name: rag-n8n
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    environment:
+      - GENERIC_TIMEZONE=Asia/Kolkata
+      - TZ=Asia/Kolkata
+      - DB_TYPE=sqlite
+      - N8N_SECURE_COOKIE=false
+      - N8N_RESTRICT_FILE_ACCESS_TO=/data
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./data:/data
+
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: rag-postgres
+    restart: unless-stopped
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_USER=rag_user
+      - POSTGRES_PASSWORD=rag_local_password
+      - POSTGRES_DB=rag_database
+    volumes:
+    - postgres_data:/var/lib/postgresql/data
+    - ./init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+
+volumes:
+  n8n_data:
+  postgres_data:
